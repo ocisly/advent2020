@@ -9,11 +9,15 @@
    :password password})
 
 (defn valid-password? [{:keys [low high character password]}]
-  (<= low (get (frequencies password) character 0) high))
+  (let [freq ((frequencies password) character 0)]
+    (<= low freq high)))
 
 (defn valid-positional-password? [{:keys [low high character password]}]
-  (let [characters (map (comp (partial nth password) dec) [low high])]
-    (= 1 (count (filter #{character} characters)))))
+  (->> [low high]
+       (map #(nth password (dec %)))
+       (filter #{character})
+       (count)
+       (= 1)))
 
 (defn puzzle1 [passwords]
   (->> passwords
