@@ -15,4 +15,4 @@
         [x y] (reduce sum-to diffs numbers)]
     (* x y)))
 
-(puzzle1 input)
+(comment (time (puzzle1 input)))
