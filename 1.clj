@@ -1,6 +1,6 @@
 (defn debug [x] (prn x) x)
 
-(def input (->> (slurp "input.txt")
+(def input (->> (slurp "input1.txt")
                 (clojure.string/split-lines)
                 (map #(Integer/parseInt %))))
 
