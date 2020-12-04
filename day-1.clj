@@ -1,4 +1,4 @@
-(ns puzzle-1 (:require hashp.core))
+(ns day-1 (:require hashp.core))
 
 (def input (->> (slurp "input1.txt")
                 (clojure.string/split-lines)

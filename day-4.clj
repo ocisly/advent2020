@@ -1,4 +1,4 @@
-(ns puzzle-4 (:require hashp.core))
+(ns day-4 (:require hashp.core))
 
 ;byr (Birth Year) - four digits; at least 1920 and at most 2002.
 ;iyr (Issue Year) - four digits; at least 2010 and at most 2020.

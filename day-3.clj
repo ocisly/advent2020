@@ -1,4 +1,4 @@
-(ns puzzle-3 (:require hashp.core))
+(ns day-3 (:require hashp.core))
 
 (def input (->> (slurp "input3.txt")))
 
