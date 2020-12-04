@@ -21,13 +21,6 @@
 (defn present? [passport]
   (clojure.set/subset? #{:byr :iyr :eyr :hgt :hcl :ecl :pid} (set (keys passport))))
 
-(defn puzzle1 [in]
-  (->> (clojure.string/split in #"\n\n")
-       (map (partial re-seq #"(\S+):(\S+)"))
-       (map parse)
-       (filter present?)
-       (count)))
-
 (defn valid-hgt [hgt]
   (if-let [[_ n unit] (re-find #"(\d+)(cm|in)" hgt)]
     (case unit
@@ -45,14 +38,18 @@
     (re-matches #"[0-9]{9}" pid)
     (#{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"} ecl)))
 
-
-(defn puzzle2 [in]
+(defn count-matching-passports [pred in]
   (->> (clojure.string/split in #"\n\n")
        (map (partial re-seq #"(\S+):(\S+)"))
        (map parse)
-       (filter present?)
-       (filter valid?)
+       (filter pred)
        (count)))
+
+(defn puzzle1 [in]
+  (count-matching-passports present? in))
+
+(defn puzzle2 [in]
+  (count-matching-passports (every-pred present? valid?) in))
 
 (comment (time (puzzle2 "pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
 hcl:#623a2f
