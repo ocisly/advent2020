@@ -1,4 +1,4 @@
-(defn debug [x] (prn x) x)
+(ns puzzle-1 (:require hashp.core))
 
 (def input (->> (slurp "input1.txt")
                 (clojure.string/split-lines)

@@ -1,3 +1,5 @@
+(ns puzzle-4 (:require hashp.core))
+
 ;byr (Birth Year) - four digits; at least 1920 and at most 2002.
 ;iyr (Issue Year) - four digits; at least 2010 and at most 2020.
 ;eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
@@ -7,8 +9,6 @@
 ;hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
 ;ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
 ;pid (Passport ID) - a nine-digit number, including leading zeroes.
-
-(defn debug [x] (prn x) x)
 
 (def input (->> (slurp "input4.txt")))
 

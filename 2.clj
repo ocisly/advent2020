@@ -1,4 +1,4 @@
-(defn debug [& x] (apply prn x) x)
+(ns puzzle-2 (:require hashp.core))
 
 (def input (->> (slurp "input2.txt")))
 
