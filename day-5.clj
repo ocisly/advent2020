@@ -13,7 +13,7 @@
 (def find-col (partial find-pos 0 7))
 
 (defn find-seat [instructions]
-  (let [[rows cols] (partition-all 7 instructions)
+  (let [[rows cols] (split-at 7 instructions)
         row (find-row rows)
         col (find-col cols)]
     (+ (* row 8) col)))
