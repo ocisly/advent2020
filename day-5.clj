@@ -24,16 +24,17 @@
        (map find-seat)
        (apply max)))
 
-(defn missing-seat? [[before after]]
-  (= 2 (- after before)))
+(defn missing-seat [[before after]]
+  (when (= 2 (- after before))
+    (inc before)))
 
 (defn puzzle2 [boarding-passes]
   (->> boarding-passes
        (clojure.string/split-lines)
        (map find-seat)
        (sort)
-       (partition-all 2)
-       (filter missing-seat?)))
+       (partition 2 1)
+       (some missing-seat)))
 
 (comment (time (puzzle1 input)))
 (comment (time (puzzle2 input)))
