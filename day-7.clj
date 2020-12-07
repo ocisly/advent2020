@@ -15,7 +15,7 @@
         specs (clojure.string/split body #" bags?[,.] ?")] 
     {:container head
      :containees (into {} (map parse-spec (remove #{"no other"} specs)))}))
-        
+
 (pldb/db-rel can-contain ^:index p1 ^:index p2 n)
 
 (defn can-contain-transitive [x y n]
@@ -29,16 +29,16 @@
 (defn bags-contained-in [needle facts]
   (pldb/with-db facts
     (l/run* [q]
-      (l/fresh [x y]
-        (can-contain-transitive x needle y)
-        (l/== q [x y])))))
+            (l/fresh [x y]
+                     (can-contain-transitive x needle y)
+                     (l/== q [x y])))))
 
 (defn bags-that-contain [needle facts]
   (pldb/with-db facts
     (l/run* [q]
-      (l/fresh [x y]
-        (can-contain-transitive needle x y)
-        (l/== q [x y])))))
+            (l/fresh [x y]
+                     (can-contain-transitive needle x y)
+                     (l/== q [x y])))))
 
 (defn expand-rule [{:keys [container containees]}]
   (map vector (repeat container) containees))
