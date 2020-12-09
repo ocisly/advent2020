@@ -31,7 +31,7 @@
                   vec)
         secret-num (eq-sum-of-preamble 0 k nums)]
     (->> (find-range-sum-to secret-num nums)
-         ((juxt #(apply min %) #(apply max %)))
+         (apply (juxt min max))
          (apply +))))
 
 (comment (def input (->> (slurp "input9.txt"))))
