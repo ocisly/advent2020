@@ -1,4 +1,4 @@
-(ns day-8 (:require [hashp.core]))
+(ns day-9 (:require [hashp.core]))
 
 (def parse-int #(Long/parseLong %))
 
