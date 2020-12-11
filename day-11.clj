@@ -6,15 +6,67 @@
 (defn parse [c]
   (identity c))
 
+(defn west [x y board]
+  (let [y (dec y)]
+    (cond
+      (< y 0) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn east [x y board]
+  (let [y (inc y)]
+    (cond
+      (>= y (count (board 0))) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn north [x y board]
+  (let [x (dec x)]
+    (cond
+      (< x 0) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn south [x y board]
+  (let [x (inc x)]
+    (cond
+      (>= x (count board)) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn north-west [x y board]
+  (let [x (dec x) y (dec y)]
+    (cond
+      (or (< x 0) (< y 0)) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn south-east [x y board]
+  (let [x (inc x) y (inc y)]
+    (cond
+      (or (>= x (count board)) (>= y (count (board 0)))) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn north-east [x y board]
+  (let [x (dec x) y (inc y)]
+    (cond
+      (or (< x 0) (>= y (count (board 0)))) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
+(defn south-west [x y board]
+  (let [x (inc x) y (dec y)]
+    (cond
+      (or (>= x (count board)) (< y 0)) nil
+      (not= ((board x) y) \.) ((board x) y)
+      :else (recur x y board))))
+
 (defn neighbors [x y board]
-  (for [a (range -1 2)
-        :let [i (+ x a)]
-        :when (< -1 i (count board))
-        b (range -1 2)
-        :let [j (+ y b)]
-        :when (and (not= a b 0) 
-                   (< -1 j (count (board 0))))]
-    ((board i) j)))
+  ((juxt
+     north-west north north-east
+     west             east
+     south-west south south-east) x y board))
 
 (defn parse-line [line]
   (mapv parse line))
@@ -24,7 +76,7 @@
         occupied (get xs \# 0)]
     (cond
       (and (= cell \L) (zero? occupied)) \#
-      (and (= cell \#) (>= occupied 4)) \L
+      (and (= cell \#) (>= occupied 5)) \L
       :else cell)))
 
 (defn reshuffle [board]
@@ -35,7 +87,7 @@
 (defn pretty [board]
   (clojure.string/join "\n" (map clojure.string/join board)))
 
-(defn puzzle1 [in]
+(defn puzzle2 [in]
   (->> (clojure.string/split-lines in)
        (mapv parse-line)
        (iterate reshuffle)
@@ -47,5 +99,4 @@
        (frequencies)
        (#(% \#))))
 
-(puzzle1 input)
 (comment (puzzle2 input))
