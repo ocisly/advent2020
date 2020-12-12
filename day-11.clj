@@ -3,9 +3,6 @@
 (def parse-int #(Long/parseLong %))
 (def input (slurp "input11.txt"))
 
-(defn parse [c]
-  (identity c))
-
 (defn west [x y board]
   (let [y (dec y)]
     (cond
@@ -62,41 +59,63 @@
       (not= ((board x) y) \.) ((board x) y)
       :else (recur x y board))))
 
-(defn neighbors [x y board]
+(defn neighbors2 [x y board]
   ((juxt
      north-west north north-east
      west             east
      south-west south south-east) x y board))
 
-(defn parse-line [line]
-  (mapv parse line))
+(defn neighbors1 [x y board]
+  (for [a (range -1 2)
+        :let [i (+ x a)]
+        :when (< -1 i (count board))
+        b (range -1 2)
+        :let [j (+ y b)]
+        :when (and (not= a b 0)
+                   (< -1 j (count (board 0))))]
+    ((board i) j)))
 
-(defn transform [i j cell board]
-  (let [xs (frequencies (neighbors i j board))
+(defn transform [cell k neighbors]
+  (let [xs (frequencies neighbors)
         occupied (get xs \# 0)]
     (cond
       (and (= cell \L) (zero? occupied)) \#
-      (and (= cell \#) (>= occupied 5)) \L
+      (and (= cell \#) (>= occupied k)) \L
       :else cell)))
 
-(defn reshuffle [board]
-  (into []
-        (for [[i row] (map-indexed vector board)]
-           (into [] (map-indexed #(transform i %1 %2 board) row)))))
+(defn reshuffle [k neighbor-fn board]
+  (let [indices (for [x (range (count board))
+                      y (range (count (board 0)))]
+                  [x y])
+        evolve (fn [board [x y]]
+                 (update-in board [x y]
+                            transform
+                            k
+                            (neighbor-fn x y board)))]
+    (reduce evolve board indices)))
 
-(defn pretty [board]
-  (clojure.string/join "\n" (map clojure.string/join board)))
-
-(defn puzzle2 [in]
-  (->> (clojure.string/split-lines in)
-       (mapv parse-line)
-       (iterate reshuffle)
+(defn find-fixed-point [f xs]
+  (->> (iterate f xs)
        (partition 2 1)
        (drop-while #(apply not= %))
        (first)
-       (second)
+       (second)))
+
+(defn puzzle1 [in]
+  (->> (clojure.string/split-lines in)
+       (mapv vec)
+       (find-fixed-point (partial reshuffle 4 neighbors1))
        (apply concat)
        (frequencies)
        (#(% \#))))
 
-(comment (puzzle2 input))
+(defn puzzle2 [in]
+  (->> (clojure.string/split-lines in)
+       (mapv vec)
+       (find-fixed-point (partial reshuffle 5 neighbors2))
+       (apply concat)
+       (frequencies)
+       (#(% \#))))
+
+(comment (time (puzzle1 input)))
+(comment (time (puzzle2 input)))
