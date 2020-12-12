@@ -3,76 +3,27 @@
 (def parse-int #(Long/parseLong %))
 (def input (slurp "input11.txt"))
 
-(defn west [x y board]
-  (let [y (dec y)]
-    (cond
-      (< y 0) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
+(defn on-board? [x y board]
+  (and (contains? board x)
+       (contains? (board 0) y)))
 
-(defn east [x y board]
-  (let [y (inc y)]
+(defn find-next-seat [x y dx dy board]
+  (let [x (+ x dx) y (+ y dy)]
     (cond
-      (>= y (count (board 0))) nil
+      (not (on-board? x y board)) nil
       (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn north [x y board]
-  (let [x (dec x)]
-    (cond
-      (< x 0) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn south [x y board]
-  (let [x (inc x)]
-    (cond
-      (>= x (count board)) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn north-west [x y board]
-  (let [x (dec x) y (dec y)]
-    (cond
-      (or (< x 0) (< y 0)) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn south-east [x y board]
-  (let [x (inc x) y (inc y)]
-    (cond
-      (or (>= x (count board)) (>= y (count (board 0)))) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn north-east [x y board]
-  (let [x (dec x) y (inc y)]
-    (cond
-      (or (< x 0) (>= y (count (board 0)))) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
-
-(defn south-west [x y board]
-  (let [x (inc x) y (dec y)]
-    (cond
-      (or (>= x (count board)) (< y 0)) nil
-      (not= ((board x) y) \.) ((board x) y)
-      :else (recur x y board))))
+      :else (recur x y dx dy board))))
 
 (defn neighbors2 [x y board]
-  ((juxt
-     north-west north north-east
-     west             east
-     south-west south south-east) x y board))
+  (for [dx (range -1 2)
+        dy (range -1 2)
+        :when (not= dx dy 0)]
+    (find-next-seat x y dx dy board)))
 
 (defn neighbors1 [x y board]
-  (for [a (range -1 2)
-        :let [i (+ x a)]
-        :when (< -1 i (count board))
-        b (range -1 2)
-        :let [j (+ y b)]
-        :when (and (not= a b 0)
-                   (< -1 j (count (board 0))))]
+  (for [a (range -1 2) :let [i (+ x a)]
+        b (range -1 2) :let [j (+ y b)]
+        :when (and (not= a b 0) (on-board? i j board))]
     ((board i) j)))
 
 (defn transform [cell k neighbors]
@@ -89,9 +40,7 @@
                   [x y])
         evolve (fn [board [x y]]
                  (update-in board [x y]
-                            transform
-                            k
-                            (neighbor-fn x y board)))]
+                            transform k (neighbor-fn x y board)))]
     (reduce evolve board indices)))
 
 (defn find-fixed-point [f xs]
@@ -105,7 +54,7 @@
   (->> (clojure.string/split-lines in)
        (mapv vec)
        (find-fixed-point (partial reshuffle 4 neighbors1))
-       (apply concat)
+       (flatten)
        (frequencies)
        (#(% \#))))
 
@@ -113,7 +62,7 @@
   (->> (clojure.string/split-lines in)
        (mapv vec)
        (find-fixed-point (partial reshuffle 5 neighbors2))
-       (apply concat)
+       (flatten)
        (frequencies)
        (#(% \#))))
 
