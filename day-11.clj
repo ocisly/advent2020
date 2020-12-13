@@ -21,26 +21,37 @@
     (find-next-seat x y dx dy board)))
 
 (defn neighbors1 [x y board]
-  (for [a (range -1 2) :let [i (+ x a)]
-        b (range -1 2) :let [j (+ y b)]
-        :when (and (not= a b 0) (on-board? i j board))]
+  (for [dx (range -1 2) :let [i (+ x dx)]
+        dy (range -1 2) :let [j (+ y dy)]
+        :when (and (not= dx dy 0) (on-board? i j board))]
     ((board i) j)))
 
-(defn transform [cell k neighbors]
-  (let [xs (frequencies neighbors)
-        occupied (get xs \# 0)]
-    (cond
-      (and (= cell \L) (zero? occupied)) \#
-      (and (= cell \#) (>= occupied k)) \L
-      :else cell)))
+(defn at-least [k pred xs]
+  (>= (count (take k (filter pred xs))) k))
 
-(defn reshuffle [k neighbor-fn board]
+(def occupied? #{\#})
+
+(defn transform [k cell neighbors]
+  (case cell
+    \. cell
+    \L (if (not (at-least 1 occupied? neighbors)) \# cell)
+    \# (if (at-least k occupied? neighbors) \L cell)))
+
+(defn transform1 [cell x y board]
+  (->> (neighbors1 x y board)
+       (transform 4 cell)))
+
+(defn transform2 [cell x y board]
+  (->> (neighbors2 x y board)
+       (transform 5 cell)))
+
+(defn reshuffle [transform-fn board]
   (let [indices (for [x (range (count board))
                       y (range (count (board 0)))]
                   [x y])
-        evolve (fn [board [x y]]
-                 (update-in board [x y]
-                            transform k (neighbor-fn x y board)))]
+        evolve (fn [new-board [x y]]
+                 (update-in new-board [x y]
+                            transform-fn x y board))]
     (reduce evolve board indices)))
 
 (defn find-fixed-point [f xs]
@@ -53,18 +64,18 @@
 (defn puzzle1 [in]
   (->> (clojure.string/split-lines in)
        (mapv vec)
-       (find-fixed-point (partial reshuffle 4 neighbors1))
+       (find-fixed-point #(reshuffle transform1 %))
        (flatten)
-       (frequencies)
-       (#(% \#))))
+       (filter occupied?)
+       (count)))
 
 (defn puzzle2 [in]
   (->> (clojure.string/split-lines in)
        (mapv vec)
-       (find-fixed-point (partial reshuffle 5 neighbors2))
+       (find-fixed-point #(reshuffle transform2 %))
        (flatten)
-       (frequencies)
-       (#(% \#))))
+       (filter occupied?)
+       (count)))
 
 (comment (time (puzzle1 input)))
 (comment (time (puzzle2 input)))
