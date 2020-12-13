@@ -14,14 +14,14 @@
       \R {:param :rotation :value value}
       \F {:param :forward :value value})))
 
-(defn navigate1 [ship action]
-  (if (= (:param action) :forward)
+(defn navigate1 [ship {:keys [param value]}]
+  (if (= param :forward)
     (case (mod (:rotation ship) 360)
-      0 (update ship :x + (:value action))
-      90 (update ship :y - (:value action))
-      180 (update ship :x - (:value action))
-      270 (update ship :y + (:value action)))
-    (update ship (:param action) + (:value action))))
+      0 (update ship :x + value)
+      90 (update ship :y - value)
+      180 (update ship :x - value)
+      270 (update ship :y + value))
+    (update ship param + value)))
 
 (defn manhattan-distance [{:keys [x y]}]
   (+ (Math/abs x) (Math/abs y)))
@@ -32,28 +32,23 @@
        (reduce navigate1 {:x 0 :y 0 :rotation 0})
        (manhattan-distance)))
 
-(defn rotate [waypoint angle]
-  (let [angle (Math/toRadians (- angle))]
-    {:x (int
-          (Math/round
-            (- (* (Math/cos angle) (:x waypoint))
-               (* (Math/sin angle) (:y waypoint)))))
-     :y (int
-          (Math/round
-            (+ (* (Math/sin angle) (:x waypoint))
-               (* (Math/cos angle) (:y waypoint)))))}))
+(defn rotate [{:keys [x y]} angle]
+  (case angle
+    ( 90 -270) {:x y     :y (- x)}
+    (180 -180) {:x (- x) :y (- y)}
+    (270  -90) {:x (- y) :y x}))
 
 (defn forward [p1 p2 distance]
   (-> p1
       (update :x + (* distance (:x p2)))
       (update :y + (* distance (:y p2)))))
 
-(defn navigate2 [state action]
-  (case (:param action)
-    :x (update-in state [:waypoint :x] + (:value action))
-    :y (update-in state [:waypoint :y] + (:value action))
-    :rotation (update state :waypoint rotate (:value action))
-    :forward (update state :ship forward (:waypoint state) (:value action))))
+(defn navigate2 [state {:keys [param value]}]
+  (case param
+    :x (update-in state [:waypoint :x] + value)
+    :y (update-in state [:waypoint :y] + value)
+    :rotation (update state :waypoint rotate value)
+    :forward (update state :ship forward (:waypoint state) value)))
 
 (defn puzzle2 [in]
   (->> (clojure.string/split-lines in)
