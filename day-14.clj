@@ -2,11 +2,6 @@
 
 (def parse-bin #(Long/parseLong % 2))
 (def parse-int #(Long/parseLong %))
-(def input (slurp "input14.txt"))
-(comment (def input "mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
-mem[8] = 11
-mem[7] = 101
-mem[8] = 0"))
 
 (defn parse [[instr value]]
   (case instr
@@ -17,24 +12,34 @@ mem[8] = 0"))
 
 (defn mask-bit [m v]
   (case m
-    \X v
+    \X #{\0 \1}
     \1 \1
-    \0 \0))
-    
+    \0 v))
+
+(defn store-indirect [mem dests value]
+  (reduce #(assoc %1 %2 value) mem dests))
+
+(defn bifurcate [head [bit & address]]
+  (cond
+    (nil? bit) (list head)
+    (set? bit) (mapcat #(bifurcate (conj head %) address) bit)
+    :else (recur (conj head bit) address)))
+
 (defn apply-mask [mask value]
   (let [binary (Long/toString value 2)
         padding (repeat (- (count mask) (count binary)) \0)]
     (->> (clojure.string/join (concat padding binary))
          (map mask-bit mask)
-         (clojure.string/join)
-         (parse-bin))))
+         (bifurcate [])
+         (map clojure.string/join)
+         (map parse-bin))))
 
 (defn execute [acc instr]
   (case (:instr instr)
     :mask (assoc acc :mask (:value instr))
-    :mem (assoc-in acc [:mem (:index instr)] (apply-mask (:mask acc) (:value instr)))))
+    :mem (update acc :mem store-indirect (apply-mask (:mask acc) (:index instr)) (:value instr))))
 
-(defn puzzle1 [in]
+(defn puzzle2 [in]
   (->> (clojure.string/split-lines input)
        (map #(clojure.string/split % #" = "))
        (map parse)
@@ -43,4 +48,5 @@ mem[8] = 0"))
        (vals)
        (apply +)))
 
-(puzzle1 input)
+(def input (slurp "input14.txt"))
+(puzzle2 input)
