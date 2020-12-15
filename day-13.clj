@@ -67,7 +67,7 @@
          (map (juxt :id #(mod (- (:id %) (:index %)) (:id %))))
          (apply map vector)
          (apply chinese-remainder))))
-        
+
 (def input (slurp "input13.txt"))
 (puzzle1 input)
 (puzzle2 input)
