@@ -15,9 +15,9 @@
        (map parse-int)))
 
 (defn parse [rules yours others]
- {:rules (map parse-rule rules)
-  :yours (parse-ticket (second yours))
-  :others (map parse-ticket (rest others))})
+  {:rules (map parse-rule rules)
+   :yours (parse-ticket (second yours))
+   :others (map parse-ticket (rest others))})
 
 (defn in-range? [value {:keys [low high]}]
   (when (<= low value high)
