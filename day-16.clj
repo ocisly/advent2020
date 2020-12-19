@@ -44,19 +44,45 @@
        (apply parse)
        (solve1)))
 
+(defn matches-all-vals? [values rule]
+  (every? #(matches? % rule) values))
+
+(defn find-rules [i rules values]
+  (->> rules
+       (filter #(matches-all-vals? values %))
+       (set)
+       (assoc {:pos i} :rules)))
+
+(defn find-rule [[r1 r2]]
+  (->> (map :rules [r2 r1])
+       (apply clojure.set/difference)
+       (first)
+       (assoc (select-keys r2 [:pos]) :rule)))
+
+(defn rule-of-interest? [{{field :field} :rule}]
+  (clojure.string/starts-with? field "departure"))
+
+(defn solve2 [{:keys [rules yours others]}]
+  (->> others
+       (filter #(empty? (find-mismatches rules %)))
+       (apply map hash-set)
+       (map-indexed #(find-rules %1 rules %2))
+       (sort-by (comp count :rules))
+       (cons nil)
+       (partition 2 1)
+       (map find-rule)
+       (filter rule-of-interest?)
+       (map :pos)
+       (map (vec yours))
+       (apply *)))
+
+(defn puzzle2 [in]
+  (->> (clojure.string/split-lines in)
+       (partition-by empty?)
+       (remove #(= (count %) 1))
+       (apply parse)
+       (solve2)))
+
 (def input (slurp "input16.txt"))
-(comment (def input "class: 1-3 or 5-7
-row: 6-11 or 33-44
-seat: 13-40 or 45-50
-
-your ticket:
-7,1,14
-
-nearby tickets:
-7,3,47
-40,4,50
-55,2,20
-38,6,12
-"))
-
-(puzzle1 input)
+(time (puzzle1 input))
+(time (puzzle2 input))
