@@ -8,8 +8,8 @@
     (sequential? x) (recur stack (first (reduce evaluate1 (list) x)))
     (and (number? x) (empty? stack)) (conj stack x)
     (number? x) (let [[op y & rst] stack]
-                  (conj rst ((eval op) x y)))
-    ('#{+ - * /} x) (conj stack x)))
+                  (conj rst ((resolve op) x y)))
+    ('#{+ *} x) (conj stack x)))
 
 (defn evaluate2 [stack x]
   (cond
