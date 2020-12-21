@@ -1,4 +1,4 @@
-(ns day-7
+(ns day-21
   (:require [hashp.core]))
 
 (def parse-int #(Integer/parseInt %))
